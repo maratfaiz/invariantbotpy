@@ -1,0 +1,27 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  bot:
+    build: .
+    depends_on:
+      - ollama
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1}
+      - SUPERADMIN_IDS=${SUPERADMIN_IDS}
+      - DB_PATH=/app/data/bot.db
+      - WARN_LIMIT=${WARN_LIMIT:-3}
+      - MUTE_MINUTES=${MUTE_MINUTES:-60}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
